@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import List, Optional, Union
 import pathspec
 import shutil
+import platform
 
 
 def load_gitignore_patterns(root: Path) -> pathspec.PathSpec:
@@ -214,7 +215,12 @@ def recipe() -> None:
         raise RuntimeError("npx cannot run. is node installed and in your path?")
     print("Creating ")
     compatibility_mode = True
-    sub_cmd = [npx_command, 'love.js.cmd', kristal_output, options.html_folder_output,
+
+    love_js_command = 'love.js.cmd'
+    if platform.system() == 'Linux' or platform.system() == 'Darwin':
+        love_js_command = 'love.js'
+
+    sub_cmd = [npx_command, love_js_command, kristal_output, options.html_folder_output,
                '-c' if compatibility_mode else None,
                 '-m', str(options.memory) if options.memory else '700000000',
                 '-t', (options.game_name or 'kristal')

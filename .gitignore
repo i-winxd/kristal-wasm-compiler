@@ -1,8 +1,6 @@
 # this ignores everything within directories, because
 # I totally won't be making any more directories in this repository
-**
-!/*
-!.github/
+
 
 .vscode/
 .idea/
@@ -12,5 +10,5 @@
 node_modules/
 kristal_temp_written_*
 REM_*
-
+dist/
 
