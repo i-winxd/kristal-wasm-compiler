@@ -15,6 +15,7 @@ Works on Windows, macOS, and Linux although only test for Windows so far.
 
 Have these installed:
 
+- FFMPEG
 - Install node.js (tested with version 22)
 - Python 3.9 or later (tested with python 3.12) with the dependencies listed in `requirements.txt`. You should make a virtual environment if you wish to utilize packages, which Linux users know to do 100% of the time
 
@@ -53,6 +54,8 @@ Once you are finished, `cd` to the new folder created (which is what you passed 
 and start a http server there. Best way to do it is by running `npx http-server`.
 
 This takes *about* a minute to run.
+
+If you're unsure of the steps look at the github actions used to build a playable prototype of this.
 
 ## Limitations
 
