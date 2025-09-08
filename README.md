@@ -30,22 +30,28 @@ For which, the arguments are:
 **FILES TARGETED BY `.gitignore` IN THE KRISTAL FOLDER WILL NOT BE ZIPPED, and so is the `.git` folder there**
 
 ```
-usage: compile.py [-h] [--game-name GAME_NAME] [--compress] [--base-href BASE_HREF] kristal_folder html_folder_output
+usage: compile.py [-h] [--game-name GAME_NAME] [--compress] [--base-href BASE_HREF] [--favicon FAVICON]
+                  [--keywords KEYWORDS] [--description DESCRIPTION] [--author AUTHOR]
+                  kristal_folder html_folder_output
 
 Kristal WASM compiler - compiles the kristal engine to be playable on browser
 
 positional arguments:
-  kristal_folder        Path to the main Kristal repository (must have main.lua), since this is the one that gets zipped     
-  html_folder_output    Place the folder containing the HTML and where the HTTP server should be set up in this (new)        
-                        directory.
+  kristal_folder        Path to the main Kristal repository (must have main.lua), since this is the one that    
+                        gets zipped
+  html_folder_output    Place the folder containing the HTML and where the HTTP server should be set up in      
+                        this (new) directory.
 
 options:
-  -h, --help            show this help message and exit
-  --game-name GAME_NAME
                         Name of the tab
   --compress            Compress the .love file as much as possible
   --base-href BASE_HREF
                         in the head, add this: <base href="GOES HERE"> to the output HTML
+  --favicon FAVICON     Path to favicon (must be an ico file)
+  --keywords KEYWORDS   Add this as a meta tag to the HTML
+  --description DESCRIPTION
+                        Add this as a meta tag to the HTML
+  --author AUTHOR       Add this as a meta tag to the HTML
 ```
 
 **ALWAYS PASS IN THE COMPRESS ARGUMENT IF YOU DON'T WANT TO RUN OUT OF BANDWIDTH!!!!**

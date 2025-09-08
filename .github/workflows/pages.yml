@@ -54,7 +54,7 @@ jobs:
             path: kristal-repo
 
       - name: Run Builder
-        run: python3 compile.py ./kristal-repo dist --compress --base-href "/kristal-wasm-compiler/"
+        run: python3 compile.py ./kristal-repo dist --compress --base-href "/kristal-wasm-compiler/" --description "Deltarune Kristal Engine web version demo"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

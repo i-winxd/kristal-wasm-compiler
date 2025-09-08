@@ -9,7 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0",
     "love.js": "^11.4.1"
   }
 }

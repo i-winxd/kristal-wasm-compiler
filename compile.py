@@ -19,24 +19,13 @@ import subprocess
 import zipfile
 from pathlib import Path
 from typing import List, Optional, Union
+from bs4 import BeautifulSoup, Tag
 import pathspec
 import shutil
 import platform
-
+import time
 
 def load_gitignore_patterns(root: Path) -> pathspec.PathSpec:
-    """
-    Recursively searches for `.gitignore` files within the given directory tree
-    and loads all ignore patterns using `pathspec`.
-
-    Patterns are scoped relative to the location of each `.gitignore` file.
-
-    Args:
-        root (Path): The root directory to start the search.
-
-    Returns:
-        pathspec.PathSpec: A compiled pathspec object with all ignore rules.
-    """
     patterns: List[str] = []
 
     for gitignore in root.rglob(".gitignore"):
@@ -84,22 +73,15 @@ class ZipOptions:
     remove_builtin_libs: bool = True
     also_compress_converted_ogg: bool = True
     memory: Optional[int] = None
+    favicon: str = "favicon.ico"
+    keywords:str=""
+    description:str=""
+    author:str =""
 
 
 def zip_folder_respecting_gitignore(folder_path: str, zip_path_: str, options: ZipOptions) -> None:
     """
-    Zips the contents of a folder while excluding:
-    - Any paths matched by `.gitignore` files (including nested ones)
-    - The `.git/` directory itself
-
-    This function works even if the folder is not part of a Git repository.
-
-    Args:
-        folder_path (str): Path to the root folder to zip.
-        zip_path (str): Destination path for the output ZIP file.
-
-    Returns:
-        None
+    Zips the contents of a folder while excluding gitignore and .git
     """
     folder = Path(folder_path).resolve()
     zip_path = Path(zip_path_).resolve()
@@ -173,18 +155,30 @@ def parse_args() -> ZipOptions:
     parser.add_argument('--game-name', type=str, help="Name of the tab")
     parser.add_argument('--compress', action="store_true", help="Compress the .love file as much as possible")
     parser.add_argument('--base-href',type=str,help="in the head, add this: <base href=\"GOES HERE\"> to the output HTML")
+    parser.add_argument('--favicon', type=str, help='Path to favicon (must be an ico file)', required=False)
+    parser.add_argument('--keywords'   , type=str, default='', help="Add this as a meta tag to the HTML")
+    parser.add_argument('--description', type=str, default='', help="Add this as a meta tag to the HTML")
+    parser.add_argument('--author'     , type=str, default='', help="Add this as a meta tag to the HTML")
+
     args = parser.parse_args()
-    
+    keywords   :str = args.keywords
+    description:str = args.description
+    author     :str = args.author
     kristal_folder: str = args.kristal_folder
     html_folder_output: str = args.html_folder_output
     game_name: str = args.game_name
     base_href: str = args.base_href
     compress: bool = args.compress
+    favicon = args.favicon or "favicon.ico"
 
     options_obj = ZipOptions(
         kristal_folder=kristal_folder,html_folder_output=html_folder_output,
         game_name=game_name,
         base_href=base_href,
+        favicon=favicon,
+        keywords   =keywords   ,
+        description=description,
+        author     =author     ,
     ) if compress else ZipOptions(
         kristal_folder=kristal_folder,html_folder_output=html_folder_output,
         game_name=game_name,
@@ -194,12 +188,14 @@ def parse_args() -> ZipOptions:
         remove_borders=False,
         remove_builtin_libs=False,
         also_compress_converted_ogg=False,
-        memory=None
+        memory=None,
+        favicon=favicon,
+        keywords   =keywords   ,
+        description=description,
+        author     =author     ,
     )
-
     return options_obj
 
-import time
 
 def recipe() -> None:
     
@@ -233,8 +229,10 @@ def recipe() -> None:
 def modify_output(options: ZipOptions) -> None:
     """Current changes:
     
-    Ensure CTRL+R always reloads the page (TODO: have ctrl)
+    Ensure CTRL+R always reloads the page
     """
+
+    shutil.copy(options.favicon, os.fspath(Path(options.html_folder_output) / Path("favicon.ico")))
 
     index_html_file = Path(options.html_folder_output) / Path("index.html")
     theme_css_file = Path(options.html_folder_output) / Path("theme/love.css")
@@ -245,14 +243,46 @@ def modify_output(options: ZipOptions) -> None:
     ]
     template_res = "    \n".join(liners) + "\nfunction goFullScreen()"
     new_index = index_html_file.read_text(encoding="UTF-8").replace(template_rep, template_res)
-    if options.base_href:
-        new_index = new_index.replace("<head>", f"<head> <base href=\"{options.base_href}\">")
+    # if options.base_href:
+        # new_index = new_index.replace("<head>", f"<head> <base href=\"{options.base_href}\">")
+    
+    soup = BeautifulSoup(new_index, "html.parser")
+    head_tag = soup.find('head')
+    if head_tag and isinstance(head_tag, Tag):
+        if options.base_href:
+            base_tag = soup.new_tag('base', href=options.base_href)
+            head_tag.insert(0, base_tag)
+        icon_tag = soup.new_tag("link", rel="icon", href="favicon.ico", type="image/x-icon")
+        head_tag.insert(0, icon_tag)
+        new_tags: list[Tag] = []
+        if options.keywords:
+            head_tag.insert(0, soup.new_tag('meta', attrs={"name": "keywords", "content": options.keywords}))
+        if options.author:
+            head_tag.insert(0, soup.new_tag('meta', attrs={"name": "author", "content": options.author}))
+        if options.description:
+            head_tag.insert(0, soup.new_tag('meta', attrs={"name": "description", "content": options.description}))
+
+    for h1 in soup.find_all("h1"):
+        h1.decompose()
+    for footer in soup.find_all("footer"):
+        footer.decompose()
+    new_index = soup.prettify(formatter="html")
     index_html_file.write_text(new_index, encoding="UTF-8")
     
     template_rep_2 = "#canvas {"
-    template_rep_res = "#canvas {\n   image-rendering: pixelated;\n     image-rendering: crisp-edges;"
-    updated = theme_css_file.read_text(encoding="UTF-8").replace(template_rep_2, template_rep_res)
+    template_rep_res = "#canvas {\n    image-rendering: pixelated;\n    image-rendering: crisp-edges;\n    object-fit: contain;\n    width: 100vw !important;\n    height: 100vh !important;\n"
+    
+    find_and_replace_list: list[tuple[str, str]] = [
+        (template_rep_2, template_rep_res),
+        ("background-image: url(bg.png);", ""),
+        ("background-color: rgb( 154, 205, 237 );", "background-color: rgb(0, 0, 0);"),
+        ("color: rgb( 28, 78, 104 );", "color: rgb(255, 255, 255);")
+    ]
+    updated = theme_css_file.read_text(encoding="UTF-8")
+    for to_find, to_replace in find_and_replace_list:
+        updated = updated.replace(to_find, to_replace)
     theme_css_file.write_text(updated, encoding="UTF-8")
+
 
 if __name__ == "__main__":
     recipe()
