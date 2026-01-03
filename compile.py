@@ -100,6 +100,7 @@ def zip_folder_respecting_gitignore(folder_path: str, zip_path_: str, options: Z
             ):
                 # print("Writing ", str(relative_path))
                 # print(relative_path.parts)
+                print(f"Inserting {path}")
                 if options.remove_builtin_libs and relative_path.parts[0] == "lib":
                     pass
                     # print(f"Skipping adding the lib", relative_path)
@@ -286,3 +287,4 @@ def modify_output(options: ZipOptions) -> None:
 
 if __name__ == "__main__":
     recipe()
+    

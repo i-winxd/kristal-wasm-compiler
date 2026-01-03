@@ -1,5 +1,9 @@
 # Kristal WASM builder
 
+REMOVE DIST BEFORE...
+
+REMEMBER TO UNGITIGNORE STUFF IN THE MODS FOLDER OF THE KRISTAL DIR
+
 Builds Kristal to be playable in your browser.
 
 You should have the original Kristal repo (if it was updated to work with this) cloned. If they didn't update this to work on WASM please use my fork.
