@@ -240,6 +240,17 @@ def modify_output(options: ZipOptions) -> None:
     
     template_rep = "function goFullScreen()"
     liners = [
+        """
+            document.addEventListener('DOMContentLoaded', () => {
+                const gameContainer = document.querySelector('center');
+                gameContainer.addEventListener('touchstart', (e)=>{
+                    e.preventDefault();
+                }, { passive: false });
+                gameContainer.addEventListener('touchmove', (e)=>{
+                    e.preventDefault();
+                }, { passive: false });
+            });
+        """,
         "document.addEventListener('keydown', function(e) { if ((e.ctrlKey || e.metaKey) && (e.key === 'r' || e.key === 'F5')) {window.location.replace(window.location.href);return; } });"
     ]
     template_res = "    \n".join(liners) + "\nfunction goFullScreen()"
@@ -269,10 +280,29 @@ def modify_output(options: ZipOptions) -> None:
         footer.decompose()
     new_index = soup.prettify(formatter="html")
     index_html_file.write_text(new_index, encoding="UTF-8")
-    
+
+    tr_res_extras = """
+
+    center > div {
+        display: grid;
+        place-items: center;
+        height:  100dvh;
+    }
+
+    center {
+        touch-action: none;
+        user-select: none;
+        overflow: hidden;
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
+    }
+
+
+
+"""
     template_rep_2 = "#canvas {"
-    template_rep_res = "#canvas {\n    image-rendering: pixelated;\n    image-rendering: crisp-edges;\n    object-fit: contain;\n    width: min(100dvw, calc(100dvh * (4 / 3))) !important;\n    height: min(100dvh, calc(100dvw * (3/4))) !important;\n"
-    
+    template_rep_res = tr_res_extras + "#canvas {\n    image-rendering: pixelated;\n    image-rendering: crisp-edges;\n    object-fit: contain;\n    width: min(100dvw, calc(100dvh * (4 / 3))) !important;\n    height: min(100dvh, calc(100dvw * (3/4))) !important;\n"
     find_and_replace_list: list[tuple[str, str]] = [
         (template_rep_2, template_rep_res),
         ("background-image: url(bg.png);", ""),
