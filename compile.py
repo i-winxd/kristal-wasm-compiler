@@ -271,7 +271,7 @@ def modify_output(options: ZipOptions) -> None:
     index_html_file.write_text(new_index, encoding="UTF-8")
     
     template_rep_2 = "#canvas {"
-    template_rep_res = "#canvas {\n    image-rendering: pixelated;\n    image-rendering: crisp-edges;\n    object-fit: contain;\n    width: 100dvw !important;\n    height: 100dvh !important;\n"
+    template_rep_res = "#canvas {\n    image-rendering: pixelated;\n    image-rendering: crisp-edges;\n    object-fit: contain;\n    width: min(100dvw, calc(100dvh * (4 / 3))) !important;\n    height: min(100dvh, calc(100dvw * (3/4))) !important;\n"
     
     find_and_replace_list: list[tuple[str, str]] = [
         (template_rep_2, template_rep_res),

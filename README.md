@@ -94,3 +94,8 @@ GitHub pages:
 Cloudflare pages:
 
 - At least you get infinite bandwidth. Just keep your game under 25MB. Remove unused mods. Don't make songs too long. You can do this. Look up a guide for how to use cloudflare pages, knowing that if your game is on `example.com/blahblah` you must pass in `--base-href /blahblah/` as an argument to `compile.py`.
+
+## Aspect ratio
+
+The aspect ratio is fixed to `4/3`, the default. If you want to change this,
+look at `template_rep_res = "#canvas ..."` in that one Python file and change the CSS expression.
